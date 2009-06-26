@@ -16,6 +16,11 @@
 		}
 		
 		public function format($source, $pretty = false) {
+			header('content-type: text/plain');
+			
+			// Switch tabs for space:
+			$this->reindent($source);
+			
 			// Tidy up input:
 			$this->prepare($source);
 			
@@ -28,106 +33,160 @@
 			// Make it pretty?
 			if ($pretty) $this->pretty($source);
 			
+			// Remove body:
+			$source = preg_replace(
+				'/^<body>|<\/body>$/i', '', $source
+			);
+			
+			$source = trim($source);
+			
+			//var_dump($source); exit;
+			
 			return $source;
 		}
 		
 		protected function pretty(&$source) {
-			header('content-type: text/plain');
+			$document = new DOMDocument('1.0', 'UTF-8');
+			$document->loadXML($source);
+			$xpath = new DOMXPath($document);
+			$nodes = array();
+			$results = $xpath->query('//dd | //h1 | //h2 | //h3 | //h4 | //h5 | //h6 | //li | //p');
 			
-			// Replace characters with special meaning:
-			$search = array(
-				'/(\w)\'(\w)|(\s)\'(\d+\w?)\b(?!\')/',				// apostrophe's
-				'/(\S)\'(?=\s|[[:punct:]]|<|$)/',					// single closing
-				'/\'/',												// single opening
-				'/(\S)\"(?=\s|[[:punct:]]|<|$)/',					// double closing
-				'/"/',												// double opening
-				'/\b([A-Z][A-Z0-9]{2,})\b(?:[(]([^)]*)[)])/',		// 3+ acronym
-				'/\b( )?\.{3}/',									// ellipsis
-				'/--/',												// em dash
-				'/-/',												// en dash
-				'/(\d+)( ?)x( ?)(?=\d+)/',							// dimension sign
-				'/\b ?[([]TM[])]/i',								// trademark
-				'/\b ?[([]R[])]/i',									// registered
-				'/\b ?[([]C[])]/i'									// copyright
-			);
-			
-			$replace = array(
-				'\1&#8217;\2',										// apostrophe's
-				'\1&#8217;',										// single closing
-				'&#8216;',											// single opening
-				'\1&#8221;',										// double closing
-				'&#8220;',											// double opening
-				'<acronym title="\2">\1</acronym>',					// 3+ uppercase acronym
-				'\1&#8230;',										// ellipsis
-				'&#8212;',											// em dash
-				'&#8211;',											// en dash
-				'\1\2&#215;\3',										// dimension sign
-				'&#174;',											// trademark
-				'&#174;',											// registered
-				'&#169;'											// copyright
-			);
-			
-			$lines = preg_split("/(<.*>)/U", $source, -1, PREG_SPLIT_DELIM_CAPTURE);
-			$source = '';
-			
-			foreach ($lines as $line) {
-				if (!preg_match("/<.*>/", $line)) {
-					$line = preg_replace($search, $replace, $line);
-				}
-				
-				$source .= $line;
+			// Find nodes that may contain prettyable bits:
+			foreach ($results as $node) {
+				array_unshift($nodes, $node);
 			}
 			
-			// Prevent widows by inserting non breaking spaces:
-			$source = preg_replace(
-				'/([^\s])\s+(((<(a|span|i|b|em|strong|acronym|caps|sub|sup|abbr|big|small|code|cite|tt)[^>]*>)*\s*[^\s<>]+)(<\/(a|span|i|b|em|strong|acronym|caps|sub|sup|abbr|big|small|code|cite|tt)>)*[^\s<>]*\s*(<\/(p|h[1-6]|li)>|$))/i',
-				'\\1&#160;\\2', $source
-			);
+			// Loop through the nodes, now in reverse order:
+			foreach ($nodes as $node) {
+				$content = '';
+				
+				// Find content:
+				while ($node->hasChildNodes()) {
+					$content .= $document->saveXML($node->firstChild);
+					$node->removeChild($node->firstChild);
+				}
+				
+				// Replace characters with special meaning:
+				$search = array(
+					'/(\w)\'(\w)|(\s)\'(\d+\w?)\b(?!\')/',				// apostrophe's
+					'/(\S)\'(?=\s|[[:punct:]]|<|$)/',					// single closing
+					'/\'/',												// single opening
+					'/(\S)\"(?=\s|[[:punct:]]|<|$)/',					// double closing
+					'/"/',												// double opening
+					'/\b([A-Z][A-Z0-9]{2,})\b(?:[(]([^)]*)[)])/',		// 3+ acronym
+					'/\b( )?\.{3}/',									// ellipsis
+					'/--/',												// em dash
+					'/-/',												// en dash
+					'/(\d+)( ?)x( ?)(?=\d+)/',							// dimension sign
+					'/\b ?[([]TM[])]/i',								// trademark
+					'/\b ?[([]R[])]/i',									// registered
+					'/\b ?[([]C[])]/i'									// copyright
+				);
+				
+				$replace = array(
+					'\1&#8217;\2',										// apostrophe's
+					'\1&#8217;',										// single closing
+					'&#8216;',											// single opening
+					'\1&#8221;',										// double closing
+					'&#8220;',											// double opening
+					'<acronym title="\2">\1</acronym>',					// 3+ uppercase acronym
+					'\1&#8230;',										// ellipsis
+					'&#8212;',											// em dash
+					'&#8211;',											// en dash
+					'\1\2&#215;\3',										// dimension sign
+					'&#174;',											// trademark
+					'&#174;',											// registered
+					'&#169;'											// copyright
+				);
+				
+				$lines = preg_split("/(<.*>)/U", $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+				$content = ''; $apply = true;
+				
+				foreach ($lines as $line) {
+					// Skip over code samples:
+					if (preg_match('/^<(pre|code)/i', $line)) $apply = false;
+					else if (preg_match('/$</(pre|code)>/i', $line)) $apply = true;
+					
+					if ($apply and !preg_match("/<.*>/", $line)) {
+						$line = preg_replace($search, $replace, $line);
+					}
+					
+					$content .= $line;
+				}
+				
+				// Prevent widows:
+				$content = preg_replace(
+					'/((^|\s)\S{0,20})\s(\S{0,20})$/',
+					'\1&#160;\3', $content
+				);
+				
+				// Wrap dashes:
+				$content = str_replace(
+					array(
+						'&#8212;',
+						'&#8211;'
+					),
+					array(
+						'<span class="dash em">&#8212;</span>',
+						'<span class="dash en">&#8211;</span>'
+					),
+					$content
+				);
+				
+				// Wrap amptersands:
+				$content = preg_replace(
+					'/&#38;|&amp;/i',
+					'<span class="ampersand">&#38;</span>', $content
+				);
+				
+			    // Wrap quotation marks:
+				$content = str_replace(
+					array(
+				    	'&#8216;',
+				    	'&#8217;',
+				    	'&#8220;',
+				    	'&#8221;',
+				    	'&#171;',
+				    	'&#187;'
+					),
+					array(
+				    	'<span class="quote left single">&#8216;</span>',
+				    	'<span class="quote right single">&#8217;</span>',
+				    	'<span class="quote left double">&#8220;</span>',
+				    	'<span class="quote right double">&#8221;</span>',
+				    	'<span class="quote left angle">&#8221;</span>',
+				    	'<span class="quote right angle">&#8221;</span>'
+					),
+					$content
+				);
+				
+				// Wrap ellipsis:
+				$content = str_replace(
+					'&#8230;', '<span class="ellipsis">&#8230;</span>', $content
+				);
+				
+				// Replace content:
+				$fragment = $document->createDocumentFragment();
+				$fragment->appendXML($content);
+				$node->appendChild($fragment);
+			}
 			
-			// Wrap dashes:
-			$source = str_replace(
-				array(
-					'&#8212;',
-					'&#8211;'
-				),
-				array(
-					'<span class="dash em">&#8212;</span>',
-					'<span class="dash en">&#8211;</span>'
-				),
-				$source
-			);
+			$source = $document->saveXML($document->documentElement);
+		}
+		
+		protected function reindent(&$source, $tabsize = 4) {
+			if (!function_exists('__expander')) eval("
+				function __expander(\$matches) {
+					return \$matches[1] . str_repeat(
+						' ', strlen(\$matches[2]) * {$tabsize} - (strlen(\$matches[1]) % {$tabsize})
+					);
+				}
+			");
 			
-			// Wrap amptersands:
-			$source = preg_replace(
-				'/&#38;|&amp;/i',
-				'<span class="ampersand">&#38;</span>', $source
-			);
-			
-		    // Wrap quotation marks:
-			$source = str_replace(
-				array(
-			    	'&#8216;',
-			    	'&#8217;',
-			    	'&#8220;',
-			    	'&#8221;',
-			    	'&#171;',
-			    	'&#187;'
-				),
-				array(
-			    	'<span class="quote left single">&#8216;</span>',
-			    	'<span class="quote right single">&#8217;</span>',
-			    	'<span class="quote left double">&#8220;</span>',
-			    	'<span class="quote right double">&#8221;</span>',
-			    	'<span class="quote left angle">&#8221;</span>',
-			    	'<span class="quote right angle">&#8221;</span>'
-				),
-				$source
-			);
-			
-			// Wrap ellipsis:
-			$source = str_replace(
-				'&#8230;', '<span class="ellipsis">&#8230;</span>', $source
-			);
+			while (strstr($source, "\t")) {
+				$source = preg_replace_callback('%^([^\t\n]*)(\t+)%m', '__expander', $source);
+			}
 		}
 		
 		protected function prepare(&$source) {
@@ -179,7 +238,7 @@
 			$document = new DOMDocument('1.0', 'UTF-8');
 			$document->loadXML($source);
 			$xpath = new DOMXPath($document);
-			$breaks = array(
+			$nodes = array(); $breaks = array(
 				'section', 'article', 'aside', 'header', 'footer', 'nav',
 				'dialog', 'figure', 'address', 'p', 'hr', 'br', 'pre',
 				'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'img',
@@ -193,13 +252,18 @@
 			);
 			
 			// Find nodes that may contain paragraphs:
-			foreach ($xpath->query('//body') as $node) {
+			foreach ($xpath->query('//body | //blockquote | //div') as $node) {
+				array_unshift($nodes, $node);
+			}
+			
+			// Loop through the nodes, now in reverse order:
+			foreach ($nodes as $node) {
 				$default = array(
 					'type'	=> 'inline',
 					'value'	=> ''
 				);
 				$groups = array($default);
-				$output = '';
+				$content = '';
 				
 				// Group text between paragraph breaks:
 				foreach ($node->childNodes as $child) {
@@ -224,7 +288,7 @@
 				// Join together again:
 				foreach ($groups as $current) {
 					if ($current['type'] == 'break') {
-						$output .= $current['value'];
+						$content .= $current['value'];
 					}
 					
 					else if (trim($current['value'])) {
@@ -232,18 +296,22 @@
 						$value = preg_replace('/[\r\n\t]/', '<br />', $value);
 						$value = preg_replace('/\s{2,}/', ' ', $value);
 						
-						$output .= "<p>$value</p>";
+						$content .= "<p>$value</p>";
 					}
 				}
 				
-				// Replace $node with $output:
-				$parent = $node->parentNode;
+				// Remove children:
+				while ($node->hasChildNodes()) {
+					$node->removeChild($node->firstChild);
+				}
+				
+				// Replace content:
 				$fragment = $document->createDocumentFragment();
-				$fragment->appendXML($output);
-				$parent->replaceChild($fragment, $node);
+				$fragment->appendXML($content);
+				$node->appendChild($fragment);
 			}
 			
-			$source = $document->saveXML();
+			$source = $document->saveXML($document->documentElement);
 		}
 	}
 	

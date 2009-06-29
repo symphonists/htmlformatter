@@ -33,7 +33,6 @@
 			// Make it pretty?
 			if ($pretty) $this->pretty($source);
 			
-			// Remove body:
 			$source = preg_replace(
 				'/^<body>|<\/body>$/i', '', $source
 			);
@@ -75,7 +74,7 @@
 					'/(\S)\"(?=\s|[[:punct:]]|<|$)/',					// double closing
 					'/"/',												// double opening
 					'/\b([A-Z][A-Z0-9]{2,})\b(?:[(]([^)]*)[)])/',		// 3+ acronym
-					'/\b( )?\.{3}/',									// ellipsis
+					'/\.{3}/',											// ellipsis
 					'/--/',												// em dash
 					'/-/',												// en dash
 					'/(\d+)( ?)x( ?)(?=\d+)/',							// dimension sign

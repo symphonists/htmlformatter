@@ -78,9 +78,9 @@
 					'/--/',												// em dash
 					'/-/',												// en dash
 					'/(\d+)( ?)x( ?)(?=\d+)/',							// dimension sign
-					'/\b ?[([]TM[])]/i',								// trademark
-					'/\b ?[([]R[])]/i',									// registered
-					'/\b ?[([]C[])]/i'									// copyright
+					'%(^|\s)\(tm\)($|\s)%i',							// trademark
+					'%(^|\s)\(r\)($|\s)%i',								// registered
+					'%(^|\s)\(c\)($|\s)%i'								// copyright
 				);
 				
 				$replace = array(
@@ -94,9 +94,9 @@
 					'&#8212;',											// em dash
 					'&#8211;',											// en dash
 					'\1\2&#215;\3',										// dimension sign
-					'&#174;',											// trademark
-					'&#174;',											// registered
-					'&#169;'											// copyright
+					'\1&#8482;\2',										// trademark
+					'\1&#174;\2',										// registered
+					'\1&#169;\2'										// copyright
 				);
 				
 				$lines = preg_split("/(<.*>)/U", $content, -1, PREG_SPLIT_DELIM_CAPTURE);

@@ -105,7 +105,7 @@
 				foreach ($lines as $line) {
 					// Skip over code samples:
 					if (preg_match('/^<(pre|code)/i', $line)) $apply = false;
-					else if (preg_match('/$</(pre|code)>/i', $line)) $apply = true;
+					else if (preg_match('/$<\/(pre|code)>/i', $line)) $apply = true;
 					
 					if ($apply and !preg_match("/<.*>/", $line)) {
 						$line = preg_replace($search, $replace, $line);

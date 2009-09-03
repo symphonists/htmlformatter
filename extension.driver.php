@@ -305,9 +305,15 @@
 				}
 				
 				// Replace content:
-				$fragment = $document->createDocumentFragment();
-				$fragment->appendXML($content);
-				$node->appendChild($fragment);
+				try {
+					$fragment = $document->createDocumentFragment();
+					$fragment->appendXML($content);
+					$node->appendChild($fragment);
+				}
+				
+				catch (Exception $e) {
+					// Ignore...
+				}
 			}
 			
 			$source = $document->saveXML($document->documentElement);

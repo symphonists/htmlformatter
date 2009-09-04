@@ -301,14 +301,16 @@
 				}
 				
 				// Replace content:
-				try {
-					$fragment = $document->createDocumentFragment();
-					$fragment->appendXML($content);
-					$node->appendChild($fragment);
-				}
-				
-				catch (Exception $e) {
-					// Ignore...
+				if ($content) {
+					try {
+						$fragment = $document->createDocumentFragment();
+						$fragment->appendXML($content);
+						$node->appendChild($fragment);
+					}
+					
+					catch (Exception $e) {
+						// Ignore...
+					}
 				}
 			}
 			

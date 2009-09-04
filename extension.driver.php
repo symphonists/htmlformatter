@@ -16,8 +16,6 @@
 		}
 		
 		public function format($source, $pretty = false) {
-			header('content-type: text/plain');
-			
 			// Switch tabs for space:
 			$this->reindent($source);
 			
@@ -38,8 +36,6 @@
 			);
 			
 			$source = trim($source);
-			
-			//var_dump($source); exit;
 			
 			return $source;
 		}

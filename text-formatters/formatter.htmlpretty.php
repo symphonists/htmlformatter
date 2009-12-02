@@ -1,22 +1,39 @@
 <?php
 	
-	class FormatterHTMLPretty extends TextFormatter {
-		function about() {
+	class FormatterHtmlPretty extends TextFormatter {
+		public function about() {
 			return array(
-				'name'			=> 'HTML Pretty',
-				'version'		=> '1.0.1',
-				'release-date'	=> '2009-06-26',
-				'author'		=> array(
-					'name'			=> 'Rowan Lewis',
-					'website'		=> 'http://pixelcarnage.com/',
-					'email'			=> 'rowan@pixelcarnage.com'
+				'name'						=> 'HTML Pretty',
+				'author'					=> array(
+					'name'						=> 'Rowan Lewis',
+					'website'					=> 'http://pixelcarnage.com/',
+					'email'						=> 'rowan@pixelcarnage.com'
 				),
-				'description'	=> 'Sanitise HTML input.'
+				'description'				=> 'Make your HTML pretty and clean',
+				'html-formatter-editable'	=> true,
+				'html-formatter-file'		=> __FILE__,
+				'html-formatter-created'	=> '2009-12-01T14:00:00+00:00',
+				'html-formatter-updated'	=> '2009-12-02T10:51:39+00:00'
 			);
 		}
 		
-		function run($source) {
-			return $this->_Parent->ExtensionManager->create('htmlformatter')->format($source, true);
+		public function options() {
+			return array(
+				'pretty_acronyms' => true,
+				'pretty_ampersands' => true,
+				'pretty_dashes' => true,
+				'pretty_ellipses' => true,
+				'pretty_quotation_marks' => true,
+				'pretty_sentence_spacing' => false,
+				'pretty_symbols' => true,
+				'prevent_widowed_words' => true
+			);
+		}
+		
+		public function run($source) {
+			$driver = $this->_Parent->ExtensionManager->create('htmlformatter');
+			
+			return $driver->format($source, $this->options());
 		}
 	}
 	

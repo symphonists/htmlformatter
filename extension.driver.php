@@ -1,11 +1,20 @@
 <?php
+/*---------------------------------------------------------------------------*/
+	
+	require_once(TOOLKIT . '/class.textformattermanager.php');
+	
+/*---------------------------------------------------------------------------*/
 	
 	class Extension_HTMLFormatter extends Extension {
+	/*-------------------------------------------------------------------------
+		Definition:
+	-------------------------------------------------------------------------*/
+		
 		public function about() {
 			return array(
 				'name'			=> 'HTML Formatter',
-				'version'		=> '2.0.2',
-				'release-date'	=> '2009-09-04',
+				'version'		=> '2.1.0',
+				'release-date'	=> '2009-12-02',
 				'author'		=> array(
 					'name'			=> 'Rowan Lewis',
 					'website'		=> 'http://pixelcarnage.com/',
@@ -15,7 +24,158 @@
 			);
 		}
 		
-		public function format($source, $pretty = false) {
+		public function fetchNavigation() {
+			return array(
+				array(
+					'location'	=> 100,
+					'name'	=> 'Formatters',
+					'link'	=> '/formatters/'
+				)
+			);
+		}
+		
+	/*-------------------------------------------------------------------------
+		Utilities:
+	-------------------------------------------------------------------------*/
+		
+		public function getFormatters() {
+			$tfm = new TextformatterManager($this->_Parent);
+			$results = array();
+			
+			foreach ($tfm->listAll() as $handle => $about) {
+				if (!isset($about['html-formatter-editable'])) continue;
+				
+				$about['handle'] = $handle;
+				$results[] = $about;
+			}
+			
+			return $results;
+		}
+		
+		public function getFormatter($name) {
+			$tfm = new TextformatterManager($this->_Parent);
+			$formatter = $tfm->create($name);
+			
+			return array(
+				'about'		=> $formatter->about(),
+				'options'	=> $formatter->options()
+			);
+		}
+		
+		public function setFormatter(&$name, &$error, $new) {
+			$template = file_get_contents(EXTENSIONS . '/htmlformatter/templates/formatter.php');
+			$old = (!empty($name) ? $this->getFormatter($name) : array());
+			
+			// Update author:
+			if (!isset($new['about']['author'])) {
+				$new['about']['author'] = array(
+					'name'		=> $this->_Parent->Author->getFullName(),
+					'website'	=> URL,
+					'email'		=> $this->_Parent->Author->get('email')
+				);
+			}
+			
+			// Update dates:
+			$new['about']['html-formatter-created'] = DateTimeObj::getGMT('c', @strtotime($new['about']['html-formatter-created']));
+			$new['about']['html-formatter-updated'] = DateTimeObj::getGMT('c');
+			
+			// New name:
+			$name = str_replace('-', '', Lang::createHandle($new['about']['name']));
+			
+			// Create new file:
+			$filemode = $this->_Parent->Configuration->get('write_mode', 'file');
+			$filename = sprintf(
+				'%s/text-formatters/formatter.%s.php',
+				WORKSPACE, $name
+			);
+			$dirmode = $this->_Parent->Configuration->get('write_mode', 'directory');
+			$dirname = dirname($filename);
+			
+			// Make sure the directory exists:
+			if (!is_dir($dirname)) {
+				General::realiseDirectory($dirname, $dirmode);
+			}
+			
+			// Make sure new file can be written:
+			if (!is_writable($dirname) or (file_exists($filename) and !is_writable($filename))) {
+				$error = __('Cannot save formatter, path is not writable.');
+				return false;
+			}
+			
+			$filedata = sprintf(
+				$template,
+				
+				// Class name:
+				str_replace(
+					' ', '',
+					ucwords(
+						str_replace('-', ' ', Lang::createHandle($new['about']['name']))
+					)
+				),
+				
+				// Name:
+				var_export($new['about']['name'], true),
+				
+				// Author:
+				var_export($new['about']['author']['name'], true),
+				
+				// Website:
+				var_export($new['about']['author']['website'], true),
+				
+				// Email:
+				var_export($new['about']['author']['email'], true),
+				
+				// Description:
+				var_export($new['about']['description'], true),
+				
+				// Dates:
+				var_export($new['about']['html-formatter-created'], true),
+				var_export($new['about']['html-formatter-updated'], true),
+				
+				// Options:
+				var_export($new['options']['pretty_acronyms'], true),
+				var_export($new['options']['pretty_ampersands'], true),
+				var_export($new['options']['pretty_dashes'], true),
+				var_export($new['options']['pretty_ellipses'], true),
+				var_export($new['options']['pretty_quotation_marks'], true),
+				var_export($new['options']['pretty_sentence_spacing'], true),
+				var_export($new['options']['pretty_symbols'], true),
+				var_export($new['options']['prevent_widowed_words'], true)
+			);
+			
+			// Write file to disk:
+			General::writeFile($filename, $filedata, $filemode);
+			
+			// Cleanup old file:
+			if (
+				$filename != @$old['about']['html-formatter-file']
+				and file_exists($filename) and @file_exists($old['about']['html-formatter-file'])
+			) {
+				General::deleteFile($old['about']['html-formatter-file']);
+			}
+			
+			return true;
+		}
+		
+	/*-------------------------------------------------------------------------
+		Formatting:
+	-------------------------------------------------------------------------*/
+		
+		public function format($source, $options) {
+			$options = (object)array_merge(
+				array(
+					'pretty-acronyms'			=> false,
+					'pretty_ampersands'			=> false,
+					'pretty_quotation_marks'	=> false,
+					'pretty_dashes'				=> false,
+					'pretty_ellipses'			=> false,
+					'pretty_sentence_spacing'	=> false,
+					'pretty_symbols'			=> false,
+					'prevent_widowed_words'		=> false
+				),
+				$options
+			);
+			
 			// Switch tabs for space:
 			$this->reindent($source);
 			
@@ -29,18 +189,16 @@
 			$this->cleanup($source);
 			
 			// Make it pretty?
-			if ($pretty) $this->pretty($source);
+			$this->pretty($source, $options);
 			
-			$source = preg_replace(
+			$source = trim(preg_replace(
 				'/^<body>|<\/body>$/i', '', $source
-			);
-			
-			$source = trim($source);
+			));
 			
 			return $source;
 		}
 		
-		protected function pretty(&$source) {
+		protected function pretty(&$source, $options) {
 			$document = new DOMDocument('1.0', 'UTF-8');
 			$document->loadXML($source);
 			$xpath = new DOMXPath($document);
@@ -54,6 +212,7 @@
 			
 			// Loop through the nodes, now in reverse order:
 			foreach ($nodes as $node) {
+				$search = $replace = array();
 				$content = '';
 				
 				// Find content:
@@ -62,104 +221,195 @@
 					$node->removeChild($node->firstChild);
 				}
 				
-				// Replace characters with special meaning:
-				$search = array(
-					'/(\w)\'(\w)|(\s)\'(\d+\w?)\b(?!\')/',				// apostrophe's
-					'/(\S)\'(?=\s|[[:punct:]]|<|$)/',					// single closing
-					'/\'/',												// single opening
-					'/(\S)\"(?=\s|[[:punct:]]|<|$)/',					// double closing
-					'/"/',												// double opening
-					'/\b([A-Z][A-Z0-9]{2,})\b(?:[(]([^)]*)[)])/',		// 3+ acronym
-					'/\.{3}/',											// ellipsis
-					'/--/',												// em dash
-					'/-/',												// en dash
-					'/(\d+)( ?)x( ?)(?=\d+)/',							// dimension sign
-					'%(^|\s)\(tm\)($|\s)%i',							// trademark
-					'%(^|\s)\(r\)($|\s)%i',								// registered
-					'%(^|\s)\(c\)($|\s)%i'								// copyright
-				);
+				// Make quotation marks pretty:
+				if ($options->pretty_quotation_marks) {
+					$search = array_merge(
+						$search,
+						array(
+							'/(\w)\'(\w)|(\s)\'(\d+\w?)\b(?!\')/',				// apostrophe's
+							'/(\S)\'(?=\s|[[:punct:]]|<|$)/',					// single closing
+							'/\'/',												// single opening
+							'/(\S)\"(?=\s|[[:punct:]]|<|$)/',					// double closing
+							'/"/',												// double opening
+						)
+					);
+					$replace = array_merge(
+						$replace,
+						array(
+							'\1&#8217;\2',										// apostrophe's
+							'\1&#8217;',										// single closing
+							'&#8216;',											// single opening
+							'\1&#8221;',										// double closing
+							'&#8220;',											// double opening
+						)
+					);
+				}
 				
-				$replace = array(
-					'\1&#8217;\2',										// apostrophe's
-					'\1&#8217;',										// single closing
-					'&#8216;',											// single opening
-					'\1&#8221;',										// double closing
-					'&#8220;',											// double opening
-					'<acronym title="\2">\1</acronym>',					// 3+ uppercase acronym
-					'\1&#8230;',										// ellipsis
-					'&#8212;',											// em dash
-					'&#8211;',											// en dash
-					'\1\2&#215;\3',										// dimension sign
-					'\1&#8482;\2',										// trademark
-					'\1&#174;\2',										// registered
-					'\1&#169;\2'										// copyright
-				);
+				// Make sentences pretty:
+				if ($options->pretty_sentence_spacing) {
+					$search = array_merge(
+						$search,
+						array(
+							'/([!?.])(?:[ ])/',
+						)
+					);
+					$replace = array_merge(
+						$replace,
+						array(
+							'\1&#160; ',
+						)
+					);
+				}
 				
-				$lines = preg_split("/(<.*>)/U", $content, -1, PREG_SPLIT_DELIM_CAPTURE);
-				$content = ''; $apply = true;
+				// Make acronyms pretty:
+				if ($options->pretty_acronyms) {
+					$search = array_merge(
+						$search,
+						array(
+							'/\b([A-Z][A-Z0-9]{2,})\b(?:[(]([^)]*)[)])/',
+						)
+					);
+					$replace = array_merge(
+						$replace,
+						array(
+							'<acronym title="\2">\1</acronym>',
+						)
+					);
+				}
 				
-				foreach ($lines as $line) {
-					// Skip over code samples:
-					if (preg_match('/^<(pre|code)/i', $line)) $apply = false;
-					else if (preg_match('/$<\/(pre|code)>/i', $line)) $apply = true;
+				// Make ellipses pretty:
+				if ($options->pretty_ellipses) {
+					$search = array_merge(
+						$search,
+						array(
+							'/\.{3}/',
+						)
+					);
+					$replace = array_merge(
+						$replace,
+						array(
+							'\1&#8230;',
+						)
+					);
+				}
+				
+				// Make dashes pretty:
+				if ($options->pretty_dashes) {
+					$search = array_merge(
+						$search,
+						array(
+							'/--/',												// em dash
+							'/-/',												// en dash
+						)
+					);
+					$replace = array_merge(
+						$replace,
+						array(
+							'&#8212;',											// em dash
+							'&#8211;',											// en dash
+						)
+					);
+				}
+				
+				// Make symbols pretty:
+				if ($options->pretty_symbols) {
+					$search = array_merge(
+						$search,
+						array(
+							'/(\d+)( ?)x( ?)(?=\d+)/',							// dimension sign
+							'%(^|\s)\(tm\)($|\s)%i',							// trademark
+							'%(^|\s)\(r\)($|\s)%i',								// registered
+							'%(^|\s)\(c\)($|\s)%i'								// copyright
+						)
+					);
+					$replace = array_merge(
+						$replace,
+						array(
+							'\1\2&#215;\3',										// dimension sign
+							'\1&#8482;\2',										// trademark
+							'\1&#174;\2',										// registered
+							'\1&#169;\2'										// copyright
+						)
+					);
+				}
+				
+				if (!empty($search)) {
+					$lines = preg_split("/(<.*>)/U", $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+					$content = ''; $apply = true;
 					
-					if ($apply and !preg_match("/<.*>/", $line)) {
-						$line = preg_replace($search, $replace, $line);
+					foreach ($lines as $line) {
+						// Skip over code samples:
+						if (preg_match('/^<(pre|code)/i', $line)) $apply = false;
+						else if (preg_match('/$<\/(pre|code)>/i', $line)) $apply = true;
+						
+						if ($apply and !preg_match("/<.*>/", $line)) {
+							$line = preg_replace($search, $replace, $line);
+						}
+						
+						$content .= $line;
 					}
-					
-					$content .= $line;
 				}
 				
 				// Prevent widows:
-				$content = preg_replace(
-					'/((^|\s)\S{0,20})\s(\S{0,20})$/',
-					'\1&#160;\3', $content
-				);
+				if ($options->prevent_widowed_words) {
+					$content = preg_replace(
+						'/((^|\s)\S{0,20})\s(\S{0,20})$/',
+						'\1&#160;\3', $content
+					);
+				}
 				
 				// Wrap dashes:
-				$content = str_replace(
-					array(
-						'&#8212;',
-						'&#8211;'
-					),
-					array(
-						'<span class="dash em">&#8212;</span>',
-						'<span class="dash en">&#8211;</span>'
-					),
-					$content
-				);
+				if ($options->pretty_dashes) {
+					$content = str_replace(
+						array(
+							'&#8212;',
+							'&#8211;'
+						),
+						array(
+							'<span class="dash em">&#8212;</span>',
+							'<span class="dash en">&#8211;</span>'
+						),
+						$content
+					);
+				}
 				
-				// Wrap amptersands:
-				$content = preg_replace(
-					'/&#38;|&amp;/i',
-					'<span class="ampersand">&#38;</span>', $content
-				);
+				// Wrap ampersands:
+				if ($options->pretty_ampersands) {
+					$content = preg_replace(
+						'/&#38;|&amp;/i',
+						'<span class="ampersand">&#38;</span>', $content
+					);
+				}
 				
 			    // Wrap quotation marks:
-				$content = str_replace(
-					array(
-				    	'&#8216;',
-				    	'&#8217;',
-				    	'&#8220;',
-				    	'&#8221;',
-				    	'&#171;',
-				    	'&#187;'
-					),
-					array(
-				    	'<span class="quote left single">&#8216;</span>',
-				    	'<span class="quote right single">&#8217;</span>',
-				    	'<span class="quote left double">&#8220;</span>',
-				    	'<span class="quote right double">&#8221;</span>',
-				    	'<span class="quote left angle">&#8221;</span>',
-				    	'<span class="quote right angle">&#8221;</span>'
-					),
-					$content
-				);
+				if ($options->pretty_quotation_marks) {
+					$content = str_replace(
+						array(
+					    	'&#8216;',
+					    	'&#8217;',
+					    	'&#8220;',
+					    	'&#8221;',
+					    	'&#171;',
+					    	'&#187;'
+						),
+						array(
+					    	'<span class="quote left single">&#8216;</span>',
+					    	'<span class="quote right single">&#8217;</span>',
+					    	'<span class="quote left double">&#8220;</span>',
+					    	'<span class="quote right double">&#8221;</span>',
+					    	'<span class="quote left angle">&#8221;</span>',
+					    	'<span class="quote right angle">&#8221;</span>'
+						),
+						$content
+					);
+				}
 				
 				// Wrap ellipsis:
-				$content = str_replace(
-					'&#8230;', '<span class="ellipsis">&#8230;</span>', $content
-				);
+				if ($options->pretty_ellipses) {
+					$content = str_replace(
+						'&#8230;', '<span class="ellipsis">&#8230;</span>', $content
+					);
+				}
 				
 				// Replace content:
 				$fragment = $document->createDocumentFragment();
@@ -318,4 +568,5 @@
 		}
 	}
 	
+/*---------------------------------------------------------------------------*/
 ?>

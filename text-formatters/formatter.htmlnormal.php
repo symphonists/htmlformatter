@@ -1,22 +1,39 @@
 <?php
 	
 	class FormatterHTMLNormal extends TextFormatter {
-		function about() {
+		public function about() {
 			return array(
-				'name'			=> 'HTML Normal',
-				'version'		=> '1.0.1',
-				'release-date'	=> '2009-06-26',
-				'author'		=> array(
-					'name'			=> 'Rowan Lewis',
-					'website'		=> 'http://pixelcarnage.com/',
-					'email'			=> 'rowan@pixelcarnage.com'
+				'name'						=> 'HTML Normal',
+				'author'					=> array(
+					'name'						=> 'Rowan Lewis',
+					'website'					=> 'http://pixelcarnage.com/',
+					'email'						=> 'rowan@pixelcarnage.com'
 				),
-				'description'	=> 'Sanitise HTML input.'
+				'description'				=> 'Make your HTML clean',
+				'html-formatter-editable'	=> true,
+				'html-formatter-file'		=> __FILE__,
+				'html-formatter-created'	=> '2009-12-02',
+				'html-formatter-updated'	=> '2009-12-02'
 			);
 		}
 		
-		function run($source) {
-			return $this->_Parent->ExtensionManager->create('htmlformatter')->format($source, false);
+		public function options() {
+			return array(
+				'pretty_acronyms' => false,
+				'pretty_ampersands' => false,
+				'pretty_dashes' => false,
+				'pretty_ellipses' => false,
+				'pretty_quotation_marks' => false,
+				'pretty_sentence_spacing' => false,
+				'pretty_symbols' => false,
+				'prevent_widowed_words' => false
+			);
+		}
+		
+		public function run($source) {
+			$driver = $this->_Parent->ExtensionManager->create('htmlformatter');
+			
+			return $driver->format($source, $this->options());
 		}
 	}
 	

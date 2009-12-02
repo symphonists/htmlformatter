@@ -4,10 +4,13 @@ HTML Formatter
 The "HTML Formatter" allows you to use HTML safely on your website without risk
 of malformed markup breaking the front-end.
 
-Version: 2.0.2
+It also includes an editor that lets you create custom formatters with only the
+options you need enabled.
+
+Version: 2.1.0
 Author: Rowan Lewis <me@rowanlewis.com>
-Build Date: 4 September 2009
-Requirements: Symphony 2
+Build Date: 2 December 2009
+Requirements: Symphony 2.0.2
 
 
 Installation

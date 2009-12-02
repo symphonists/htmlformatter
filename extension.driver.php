@@ -4,8 +4,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'HTML Formatter',
-				'version'		=> '2.0.1',
-				'release-date'	=> '2009-06-26',
+				'version'		=> '2.0.2',
+				'release-date'	=> '2009-09-04',
 				'author'		=> array(
 					'name'			=> 'Rowan Lewis',
 					'website'		=> 'http://pixelcarnage.com/',
@@ -16,8 +16,6 @@
 		}
 		
 		public function format($source, $pretty = false) {
-			header('content-type: text/plain');
-			
 			// Switch tabs for space:
 			$this->reindent($source);
 			
@@ -38,8 +36,6 @@
 			);
 			
 			$source = trim($source);
-			
-			//var_dump($source); exit;
 			
 			return $source;
 		}
@@ -105,7 +101,7 @@
 				foreach ($lines as $line) {
 					// Skip over code samples:
 					if (preg_match('/^<(pre|code)/i', $line)) $apply = false;
-					else if (preg_match('/$</(pre|code)>/i', $line)) $apply = true;
+					else if (preg_match('/$<\/(pre|code)>/i', $line)) $apply = true;
 					
 					if ($apply and !preg_match("/<.*>/", $line)) {
 						$line = preg_replace($search, $replace, $line);
@@ -305,9 +301,17 @@
 				}
 				
 				// Replace content:
-				$fragment = $document->createDocumentFragment();
-				$fragment->appendXML($content);
-				$node->appendChild($fragment);
+				if ($content) {
+					try {
+						$fragment = $document->createDocumentFragment();
+						$fragment->appendXML($content);
+						$node->appendChild($fragment);
+					}
+					
+					catch (Exception $e) {
+						// Ignore...
+					}
+				}
 			}
 			
 			$source = $document->saveXML($document->documentElement);

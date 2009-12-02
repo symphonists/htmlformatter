@@ -13,7 +13,7 @@
 		public function about() {
 			return array(
 				'name'			=> 'HTML Formatter',
-				'version'		=> '2.0.3',
+				'version'		=> '2.1.0',
 				'release-date'	=> '2009-12-02',
 				'author'		=> array(
 					'name'			=> 'Rowan Lewis',

@@ -1,7 +1,7 @@
 <?php
 	
 	class FormatterHTMLNormal extends TextFormatter {
-		function about() {
+		public function about() {
 			return array(
 				'name'			=> 'HTML Normal',
 				'version'		=> '1.0.1',
@@ -15,7 +15,7 @@
 			);
 		}
 		
-		function run($source) {
+		public function run($source) {
 			return $this->_Parent->ExtensionManager->create('htmlformatter')->format($source, false);
 		}
 	}

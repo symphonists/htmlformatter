@@ -10,10 +10,10 @@
 		protected $_editing = false;
 		protected $_errors = array(
 			'about'		=> array(),
-			'options'	=> array()
+			'options'	=> array(),
+			'other'		=> ''
 		);
 		protected $_fields = array();
-		protected $_prepared = false;
 		protected $_status = '';
 		protected $_formatters = array();
 		protected $_uri = null;
@@ -102,7 +102,7 @@
 			
 			if (!$this->_driver->setFormatter($name, $error, $this->_fields)) {
 				$this->_valid = false;
-				$this->_errors['about']['name'] = $error;
+				$this->_errors['other'] = $error;
 				return;
 			}
 			
@@ -124,17 +124,21 @@
 			
 		// Status: -----------------------------------------------------------
 			
-			if (!$this->_valid) $this->pageAlert('
-				An error occurred while processing this form.
-				<a href="#error">See below for details.</a>',
-				Alert::ERROR
-			);
+			if (!$this->_valid) {
+				$message = __('An error occurred while processing this form <a href="#error">See below for details.</a>');
+				
+				if ($this->_errors['other']) {
+					$message = $this->_errors['other'];
+				}
+				
+				$this->pageAlert($message, Alert::ERROR);
+			}
 			
 			// Status message:
 			if ($this->_status) {
 				$action = null;
 				
-				switch($this->_status) {
+				switch ($this->_status) {
 					case 'saved': $action = '%1$s updated at %2$s. <a href="%3$s">Create another?</a> <a href="%4$s">View all %5$s</a>'; break;
 					case 'created': $action = '%1$s created at %2$s. <a href="%3$s">Create another?</a> <a href="%4$s">View all %5$s</a>'; break;
 				}

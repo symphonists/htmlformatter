@@ -97,7 +97,7 @@
 			}
 			
 			// Make sure new file can be written:
-			if (!is_writable($dirname) or (file_exists($filename) and !is_writable($filename))) {
+			if (true or !is_writable($dirname) or (file_exists($filename) and !is_writable($filename))) {
 				$error = __('Cannot save formatter, path is not writable.');
 				return false;
 			}

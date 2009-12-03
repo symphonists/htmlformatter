@@ -13,7 +13,7 @@
 				'html-formatter-editable'	=> true,
 				'html-formatter-file'		=> __FILE__,
 				'html-formatter-created'	=> '2009-12-01T14:00:00+00:00',
-				'html-formatter-updated'	=> '2009-12-02T10:51:39+00:00'
+				'html-formatter-updated'	=> '2009-12-03T22:01:28+00:00'
 			);
 		}
 		

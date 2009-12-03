@@ -83,10 +83,18 @@
 			$name = str_replace('-', '', Lang::createHandle($new['about']['name']));
 			
 			// Create new file:
+			if (strpos(@$new['about']['html-formatter-file'], dirname(__FILE__)) === 0) {
+				$rootdir = dirname(__FILE__);
+			}
+			
+			else {
+				$rootdir = WORKSPACE;
+			}
+			
 			$filemode = $this->_Parent->Configuration->get('write_mode', 'file');
 			$filename = sprintf(
 				'%s/text-formatters/formatter.%s.php',
-				WORKSPACE, $name
+				$rootdir, $name
 			);
 			$dirmode = $this->_Parent->Configuration->get('write_mode', 'directory');
 			$dirname = dirname($filename);
@@ -203,7 +211,7 @@
 			$document->loadXML($source);
 			$xpath = new DOMXPath($document);
 			$nodes = array();
-			$results = $xpath->query('//dd | //h1 | //h2 | //h3 | //h4 | //h5 | //h6 | //li | //p');
+			$results = $xpath->query('//address | //caption | //td | //th | //h1 | //h2 | //h3 | //h4 | //h5 | //h6 | //li | //dt | //dd | //p');
 			
 			// Find nodes that may contain prettyable bits:
 			foreach ($results as $node) {

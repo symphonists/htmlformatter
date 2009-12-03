@@ -1,6 +1,6 @@
 <?php
 	
-	class FormatterHTMLNormal extends TextFormatter {
+	class FormatterHtmlNormal extends TextFormatter {
 		public function about() {
 			return array(
 				'name'						=> 'HTML Normal',
@@ -12,8 +12,8 @@
 				'description'				=> 'Make your HTML clean',
 				'html-formatter-editable'	=> true,
 				'html-formatter-file'		=> __FILE__,
-				'html-formatter-created'	=> '2009-12-02',
-				'html-formatter-updated'	=> '2009-12-02'
+				'html-formatter-created'	=> '2009-12-01T14:00:00+00:00',
+				'html-formatter-updated'	=> '2009-12-03T22:02:05+00:00'
 			);
 		}
 		

@@ -38,7 +38,20 @@
 		Utilities:
 	-------------------------------------------------------------------------*/
 		
-		public function getFormatters() {
+		public function countFormatters() {
+			$tfm = new TextformatterManager($this->_Parent);
+			$results = 0;
+			
+			foreach ($tfm->listAll() as $handle => $about) {
+				if (!isset($about['html-formatter-editable'])) continue;
+				
+				$results++;
+			}
+			
+			return $results;
+		}
+		
+		public function getFormatters($column = 'name', $direction = 'asc', $page = 1, $length = 10000) {
 			$tfm = new TextformatterManager($this->_Parent);
 			$results = array();
 			
@@ -49,7 +62,39 @@
 				$results[] = $about;
 			}
 			
+			// Sorting:
+			if ($column == 'name') {
+				usort($results, array($this, 'getFormattersSortByName'));
+			}
+			
+			else if ($column == 'modified') {
+				usort($results, array($this, 'getFormattersSortByModified'));
+			}
+			
+			else if ($column == 'author') {
+				usort($results, array($this, 'getFormattersSortByAuthor'));
+			}
+			
+			if ($direction != 'asc') {
+				$results = array_reverse($results);
+			}
+			
+			// Pagination:
+			$results = array_slice($results, ($page - 1) * $length, $length);
+			
 			return $results;
+		}
+		
+		protected function getFormattersSortByName($a, $b) {
+			return strcmp($a['name'], $b['name']);
+		}
+		
+		protected function getFormattersSortByModified($a, $b) {
+			return strtotime($a['html-formatter-updated']) > strtotime($b['html-formatter-updated']);
+		}
+		
+		protected function getFormattersSortByAuthor($a, $b) {
+			return strcmp($a['author']['name'], $b['author']['name']);
 		}
 		
 		public function getFormatter($name) {

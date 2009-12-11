@@ -13,20 +13,21 @@
 				'html-formatter-editable'	=> true,
 				'html-formatter-file'		=> __FILE__,
 				'html-formatter-created'	=> '2009-12-01T14:00:00+00:00',
-				'html-formatter-updated'	=> '2009-12-03T22:01:28+00:00'
+				'html-formatter-updated'	=> '2009-12-11T03:22:52+00:00'
 			);
 		}
 		
 		public function options() {
 			return array(
-				'pretty_acronyms' => true,
-				'pretty_ampersands' => true,
-				'pretty_dashes' => true,
-				'pretty_ellipses' => true,
-				'pretty_quotation_marks' => true,
-				'pretty_sentence_spacing' => false,
-				'pretty_symbols' => true,
-				'prevent_widowed_words' => true
+				'pretty_acronyms'			=> true,
+				'pretty_ampersands'			=> true,
+				'pretty_dashes'				=> true,
+				'pretty_ellipses'			=> true,
+				'pretty_quotation_marks'	=> true,
+				'pretty_sentence_spacing'	=> false,
+				'pretty_symbols'			=> true,
+				'prevent_widowed_words'		=> true,
+				'editor_name'				=> 'none'
 			);
 		}
 		

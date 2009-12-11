@@ -315,6 +315,8 @@
 				'/^<body>|<\/body>$/i', '', $source
 			));
 			
+			//header('content-type: text/plain'); var_dump($source); exit;
+			
 			return $source;
 		}
 		
@@ -573,7 +575,11 @@
 					'hide-comments'					=> true,
 					'numeric-entities'				=> true,
 					'output-xhtml'					=> true,
-					'wrap'							=> 0
+					'wrap'							=> 0,
+					
+					// Stuff to get rid of awful word this:
+					'bare'							=> true,
+					'word-2000'						=> true
 				), 'utf8'
 			);
 			
@@ -592,7 +598,11 @@
 					'hide-comments'					=> true,
 					'numeric-entities'				=> true,
 					'output-xhtml'					=> true,
-					'wrap'							=> 0
+					'wrap'							=> 0,
+					
+					// Stuff to get rid of awful word this:
+					'bare'							=> true,
+					'word-2000'						=> true
 				), 'utf8'
 			);
 			
@@ -658,7 +668,7 @@
 					
 					else if (trim($current['value'])) {
 						$value = preg_replace('/((\r\n|\n)\s*){2,}/', "</p><p>", trim($current['value']));
-						$value = preg_replace('/[\r\n\t]/', '<br />', $value);
+						$value = preg_replace('/[\r\n\t](?<=\S)/', '<br />', $value);
 						$value = preg_replace('/\s{2,}/', ' ', $value);
 						
 						$content .= "<p>$value</p>";

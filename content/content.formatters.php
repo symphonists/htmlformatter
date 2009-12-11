@@ -90,6 +90,7 @@
 			$this->_fields['options']['pretty_sentence_spacing'] = (@$_POST['fields']['options']['pretty_sentence_spacing'] == 'yes');
 			$this->_fields['options']['pretty_symbols'] = (@$_POST['fields']['options']['pretty_symbols'] == 'yes');
 			$this->_fields['options']['prevent_widowed_words'] = (@$_POST['fields']['options']['prevent_widowed_words'] == 'yes');
+			$this->_fields['options']['editor_name'] = @$_POST['fields']['options']['editor_name'];
 			
 			if (!empty($this->_errors['about'])) {
 				$this->_valid = false;
@@ -425,6 +426,74 @@
 			
 			$option->appendChild($help);
 			$row->appendChild($option);
+			
+			$options->appendChild($row);
+			$fieldset->appendChild($options);
+			
+		// Editor -------------------------------------------------------------
+			
+			$editors = array(
+				array(
+					'label'	=> '%s Disable all&nbsp;editors?',
+					'help'	=> 'Don\'t use any of the available editor&nbsp;components.',
+					'name'	=> 'none'
+				),
+				array(
+					'label'	=> '%s Use the CKEditor&nbsp;editor?',
+					'help'	=> '<a href="http://ckeditor.com/">CKEditor</a> is a comprehensive WYSIWYG editor&nbsp;component.',
+					'name'	=> 'ckeditor'
+				),
+				array(
+					'label'	=> '%s Use the Snicked editor?',
+					'help'	=> '<a href="http://github.com/rowan-lewis/snicked">Snicked</a> is an advanced raw HTML editor&nbsp;component.',
+					'name'	=> 'snicked'
+				)
+			);
+			
+			$label = new XMLElement('h3', __('Editors'));
+			$label->setAttribute('class', 'html-formatter-label');
+			$fieldset->appendChild($label);
+			
+			$options = new XMLElement('div');
+			$options->setAttribute('class', 'html-formatter-options');
+			
+			$row = null;
+			
+			foreach ($editors as $index => $editor) {
+				if ($index % 3 == 0) {
+					if ($row) $options->appendChild($row);
+					
+					$row = new XMLElement('div');
+				}
+				
+				// Prevent widowed words:
+				$option = new XMLElement('div');
+				$option->setAttribute('class', 'html-formatter-option');
+				
+				$input = Widget::Input('fields[options][editor_name]', $editor['name']);
+				$input->setAttribute('type', 'radio');
+				
+				if ($this->_fields['options']['editor_name'] == $editor['name']) {
+					$input->setAttribute('checked', 'checked');
+				}
+				
+				else if (@!$this->_fields['options']['editor_name'] and $index == 0) {
+					$input->setAttribute('checked', 'checked');
+				}
+				
+				$label = Widget::Label(__(
+					$editor['label'], array(
+						$input->generate()
+					)
+				));
+				$option->appendChild($label);
+				
+				$help = new XMLElement('p', __($editor['help']));
+				$help->setAttribute('class', 'help');
+				
+				$option->appendChild($help);
+				$row->appendChild($option);
+			}
 			
 			$options->appendChild($row);
 			$fieldset->appendChild($options);

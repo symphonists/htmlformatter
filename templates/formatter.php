@@ -19,14 +19,15 @@
 		
 		public function options() {
 			return array(
-				'pretty_acronyms' => %s,
-				'pretty_ampersands' => %s,
-				'pretty_dashes' => %s,
-				'pretty_ellipses' => %s,
-				'pretty_quotation_marks' => %s,
-				'pretty_sentence_spacing' => %s,
-				'pretty_symbols' => %s,
-				'prevent_widowed_words' => %s
+				'pretty_acronyms'			=> %s,
+				'pretty_ampersands'			=> %s,
+				'pretty_dashes'				=> %s,
+				'pretty_ellipses'			=> %s,
+				'pretty_quotation_marks'	=> %s,
+				'pretty_sentence_spacing'	=> %s,
+				'pretty_symbols'			=> %s,
+				'prevent_widowed_words'		=> %s,
+				'editor_name'				=> %s
 			);
 		}
 		

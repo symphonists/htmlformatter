@@ -447,11 +447,14 @@
 					'help'	=> '<a href="http://ckeditor.com/">CKEditor</a> is a comprehensive WYSIWYG editor&nbsp;component.',
 					'name'	=> 'ckeditor'
 				),
+				
+				/*
 				array(
 					'label'	=> '%s Use the Snicked editor?',
 					'help'	=> '<a href="http://github.com/rowan-lewis/snicked">Snicked</a> is an advanced raw HTML editor&nbsp;component.',
 					'name'	=> 'snicked'
 				)
+				*/
 			);
 			
 			$label = new XMLElement('h3', __('Editors'));
@@ -497,6 +500,17 @@
 				
 				$option->appendChild($help);
 				$row->appendChild($option);
+			}
+			
+			header('content-type: text/plain');
+			
+			$index = $index % 3;
+			
+			while ($index < 2) {
+				$option = new XMLElement('div');
+				$row->appendChild($option);
+				
+				$index++;
 			}
 			
 			$options->appendChild($row);

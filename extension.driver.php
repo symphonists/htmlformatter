@@ -53,7 +53,7 @@
 			$includes = $editors = array();
 			$position = 29751000;
 			
-			foreach ($this->getFormatters(true) as $formatter) {
+			foreach ($this->getFormatters('name', 'asc', 1, 10000, true) as $formatter) {
 				$class = $formatter['about']['handle'];
 				$editor = $formatter['options']['editor_name'];
 				
@@ -79,11 +79,12 @@
 					case 'snicked': $include = 'snicked/snicked.js'; break;
 				}
 				
-				$page->addScriptToHead(URL . "/extensions/ckeditor/lib/{$include}", $position++);
+				$page->addScriptToHead(URL . "/extensions/htmlformatter/editors/{$include}", $position++);
 			}
 			
 			$page->addElementToHead($script, $position++);
-			$page->addScriptToHead(URL . '/extensions/ckeditor/assets/editors.js', $position++);
+			$page->addScriptToHead(URL . '/extensions/htmlformatter/assets/editors.js', $position++);
+			$page->addStylesheetToHead(URL . '/extensions/htmlformatter/assets/editors.css', 'screen', 40);
 		}
 		
 	/*-------------------------------------------------------------------------
@@ -103,7 +104,7 @@
 			return $results;
 		}
 		
-		public function getFormatters($column = 'name', $direction = 'asc', $page = 1, $length = 10000) {
+		public function getFormatters($column = 'name', $direction = 'asc', $page = 1, $length = 10000, $full = false) {
 			$tfm = new TextformatterManager($this->_Parent);
 			$results = array();
 			

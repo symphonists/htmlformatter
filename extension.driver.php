@@ -53,7 +53,7 @@
 			$includes = $editors = array();
 			$position = 29751000;
 			
-			foreach ($this->getFormatters(true) as $formatter) {
+			foreach ($this->getFormatters('name', 'asc', 1, 10000, true) as $formatter) {
 				$class = $formatter['about']['handle'];
 				$editor = $formatter['options']['editor_name'];
 				
@@ -79,18 +79,32 @@
 					case 'snicked': $include = 'snicked/snicked.js'; break;
 				}
 				
-				$page->addScriptToHead(URL . "/extensions/ckeditor/lib/{$include}", $position++);
+				$page->addScriptToHead(URL . "/extensions/htmlformatter/editors/{$include}", $position++);
 			}
 			
 			$page->addElementToHead($script, $position++);
-			$page->addScriptToHead(URL . '/extensions/ckeditor/assets/editors.js', $position++);
+			$page->addScriptToHead(URL . '/extensions/htmlformatter/assets/editors.js', $position++);
+			$page->addStylesheetToHead(URL . '/extensions/htmlformatter/assets/editors.css', 'screen', 40);
 		}
 		
 	/*-------------------------------------------------------------------------
 		Utilities:
 	-------------------------------------------------------------------------*/
 		
-		public function getFormatters($full = false) {
+		public function countFormatters() {
+			$tfm = new TextformatterManager($this->_Parent);
+			$results = 0;
+			
+			foreach ($tfm->listAll() as $handle => $about) {
+				if (!isset($about['html-formatter-editable'])) continue;
+				
+				$results++;
+			}
+			
+			return $results;
+		}
+		
+		public function getFormatters($column = 'name', $direction = 'asc', $page = 1, $length = 10000, $full = false) {
 			$tfm = new TextformatterManager($this->_Parent);
 			$results = array();
 			
@@ -114,7 +128,39 @@
 				}
 			}
 			
+			// Sorting:
+			if ($column == 'name') {
+				usort($results, array($this, 'getFormattersSortByName'));
+			}
+			
+			else if ($column == 'modified') {
+				usort($results, array($this, 'getFormattersSortByModified'));
+			}
+			
+			else if ($column == 'author') {
+				usort($results, array($this, 'getFormattersSortByAuthor'));
+			}
+			
+			if ($direction != 'asc') {
+				$results = array_reverse($results);
+			}
+			
+			// Pagination:
+			$results = array_slice($results, ($page - 1) * $length, $length);
+			
 			return $results;
+		}
+		
+		protected function getFormattersSortByName($a, $b) {
+			return strcmp($a['name'], $b['name']);
+		}
+		
+		protected function getFormattersSortByModified($a, $b) {
+			return strtotime($a['html-formatter-updated']) > strtotime($b['html-formatter-updated']);
+		}
+		
+		protected function getFormattersSortByAuthor($a, $b) {
+			return strcmp($a['author']['name'], $b['author']['name']);
 		}
 		
 		public function getFormatter($name) {
@@ -148,10 +194,18 @@
 			$name = str_replace('-', '', Lang::createHandle($new['about']['name']));
 			
 			// Create new file:
+			if (strpos(@$new['about']['html-formatter-file'], dirname(__FILE__)) === 0) {
+				$rootdir = dirname(__FILE__);
+			}
+			
+			else {
+				$rootdir = WORKSPACE;
+			}
+			
 			$filemode = $this->_Parent->Configuration->get('write_mode', 'file');
 			$filename = sprintf(
 				'%s/text-formatters/formatter.%s.php',
-				WORKSPACE, $name
+				$rootdir, $name
 			);
 			$dirmode = $this->_Parent->Configuration->get('write_mode', 'directory');
 			$dirname = dirname($filename);
@@ -269,7 +323,7 @@
 			$document->loadXML($source);
 			$xpath = new DOMXPath($document);
 			$nodes = array();
-			$results = $xpath->query('//dd | //h1 | //h2 | //h3 | //h4 | //h5 | //h6 | //li | //p');
+			$results = $xpath->query('//address | //caption | //td | //th | //h1 | //h2 | //h3 | //h4 | //h5 | //h6 | //li | //dt | //dd | //p');
 			
 			// Find nodes that may contain prettyable bits:
 			foreach ($results as $node) {

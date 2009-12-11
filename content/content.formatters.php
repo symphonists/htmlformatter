@@ -18,6 +18,10 @@
 		protected $_formatters = array();
 		protected $_uri = null;
 		protected $_valid = true;
+		protected $_pagination = null;
+		protected $_table_column = 'name';
+		protected $_table_columns = array();
+		protected $_table_direction = 'asc';
 		
 		public function __construct(&$parent){
 			parent::__construct($parent);
@@ -37,7 +41,7 @@
 			}
 			
 			else {
-				$this->_formatters = $this->_driver->getFormatters();
+				$this->__prepareIndex();
 			}
 			
 			parent::build($context);
@@ -443,11 +447,14 @@
 					'help'	=> '<a href="http://ckeditor.com/">CKEditor</a> is a comprehensive WYSIWYG editor&nbsp;component.',
 					'name'	=> 'ckeditor'
 				),
+				
+				/*
 				array(
 					'label'	=> '%s Use the Snicked editor?',
 					'help'	=> '<a href="http://github.com/rowan-lewis/snicked">Snicked</a> is an advanced raw HTML editor&nbsp;component.',
 					'name'	=> 'snicked'
 				)
+				*/
 			);
 			
 			$label = new XMLElement('h3', __('Editors'));
@@ -495,6 +502,17 @@
 				$row->appendChild($option);
 			}
 			
+			header('content-type: text/plain');
+			
+			$index = $index % 3;
+			
+			while ($index < 2) {
+				$option = new XMLElement('div');
+				$row->appendChild($option);
+				
+				$index++;
+			}
+			
 			$options->appendChild($row);
 			$fieldset->appendChild($options);
 			$this->Form->appendChild($fieldset);
@@ -529,6 +547,72 @@
 		Index
 	-------------------------------------------------------------------------*/
 		
+		public function generateLink($values) {
+			$values = array_merge(array(
+				'pg'	=> $this->_pagination->page,
+				'sort'	=> $this->_table_column,
+				'order'	=> $this->_table_direction
+			), $values);
+			
+			$count = 0;
+			$link = $this->_Parent->getCurrentPageURL();
+			
+			foreach ($values as $key => $value) {
+				if ($count++ == 0) {
+					$link .= '?';
+				}
+				
+				else {
+					$link .= '&amp;';
+				}
+				
+				$link .= "{$key}={$value}";
+			}
+			
+			return $link;
+		}
+		
+		public function __prepareIndex() {
+			$this->_table_columns = array(
+				'name'			=> array(__('Name'), true),
+				'description'	=> array(__('Description'), false),
+				'modified'		=> array(__('Modified'), true),
+				'author'		=> array(__('Author'), true)
+			);
+			
+			if (@$_GET['sort'] and $this->_table_columns[$_GET['sort']][1]) {
+				$this->_table_column = $_GET['sort'];
+			}
+			
+			if (@$_GET['order'] == 'desc') {
+				$this->_table_direction = 'desc';
+			}
+			
+			$this->_pagination = (object)array(
+				'page'		=> (@(integer)$_GET['pg'] > 1 ? (integer)$_GET['pg'] : 1),
+				'length'	=> $this->_Parent->Configuration->get('pagination_maximum_rows', 'symphony')
+			);
+			
+			$this->_formatters = $this->_driver->getFormatters(
+				$this->_table_column,
+				$this->_table_direction,
+				$this->_pagination->page,
+				$this->_pagination->length
+			);
+			
+			// Calculate pagination:
+			$this->_pagination->start = max(1, (($page - 1) * 17));
+			$this->_pagination->end = (
+				$this->_pagination->start == 1
+				? $this->_pagination->length
+				: $start + count($this->_formatters)
+			);
+			$this->_pagination->total = $this->_driver->countFormatters();
+			$this->_pagination->pages = ceil(
+				$this->_pagination->total / $this->_pagination->length
+			);
+		}
+		
 		public function __actionIndex() {
 			$checked = @array_keys($_POST['items']);
 			
@@ -556,14 +640,47 @@
 				'Create a new formatter', 'create button'
 			));
 			
-			$tableHead = array(
-				array('Name', 'col'),
-				array('Description', 'col'),
-				array('Modified', 'col'),
-				array('Author', 'col')
-			);	
-			
+			$tableHead = array();
 			$tableBody = array();
+			
+			// Columns, with sorting:
+			foreach ($this->_table_columns as $column => $values) {
+				if ($values[1]) {
+					if ($column == $this->_table_column) {
+						if ($this->_table_direction == 'desc') {
+							$direction = 'asc';
+							$label = 'ascending';
+						}
+						
+						else {
+							$direction = 'desc';
+							$label = 'descending';
+						}
+					}
+					
+					else {
+						$direction = 'asc';
+						$label = 'ascending';
+					}
+					
+					$link = $this->generateLink(array(
+						'sort'	=> $column,
+						'order'	=> $direction
+					));
+					
+					$anchor = Widget::Anchor($values[0], $link, __("Sort by {$label} " . strtolower($values[0])));
+					
+					if ($column == $this->_table_column) {
+						$anchor->setAttribute('class', 'active');
+					}
+					
+					$tableHead[] = array($anchor, 'col');
+				}
+				
+				else {
+					$tableHead[] = array($values[0], 'col');
+				}
+			}
 			
 			if (!is_array($this->_formatters) or empty($this->_formatters)) {
 				$tableBody = array(
@@ -637,7 +754,82 @@
 			$actions->appendChild(Widget::Select('with-selected', $options));
 			$actions->appendChild(Widget::Input('action[apply]', 'Apply', 'submit'));
 			
-			$this->Form->appendChild($actions);		
+			$this->Form->appendChild($actions);
+			
+			// Pagination:
+			if ($this->_pagination->pages > 1) {
+				$ul = new XMLElement('ul');
+				$ul->setAttribute('class', 'page');
+				
+				// First:
+				$li = new XMLElement('li');
+				$li->setValue(__('First'));
+				
+				if ($this->_pagination->page > 1) {
+					$li->setValue(
+						Widget::Anchor(__('First'), $this->generateLink(array(
+							'pg' => 1
+						)))->generate()
+					);
+				}
+				
+				$ul->appendChild($li);
+				
+				// Previous:
+				$li = new XMLElement('li');
+				$li->setValue(__('&larr; Previous'));
+				
+				if ($this->_pagination->page > 1) {
+					$li->setValue(
+						Widget::Anchor(__('&larr; Previous'), $this->generateLink(array(
+							'pg' => $this->_pagination->page - 1
+						)))->generate()
+					);
+				}
+				
+				$ul->appendChild($li);
+				
+				// Summary:
+				$li = new XMLElement('li', __('Page %s of %s', array(
+					$this->_pagination->page,
+					max($this->_pagination->page, $this->_pagination->pages)
+				)));
+				$li->setAttribute('title', __('Viewing %s - %s of %s entries', array(
+					$this->_pagination->start,
+					$this->_pagination->end,
+					$this->_pagination->total
+				)));
+				$ul->appendChild($li);
+				
+				// Next:
+				$li = new XMLElement('li');
+				$li->setValue(__('Next &rarr;'));
+				
+				if ($this->_pagination->page < $this->_pagination->pages) {
+					$li->setValue(
+						Widget::Anchor(__('Next &rarr;'), $this->generateLink(array(
+							'pg' => $this->_pagination->page + 1
+						)))->generate()
+					);
+				}
+				
+				$ul->appendChild($li);
+				
+				// Last:
+				$li = new XMLElement('li');
+				$li->setValue(__('Last'));
+				
+				if ($this->_pagination->page < $this->_pagination->pages) {
+					$li->setValue(
+						Widget::Anchor(__('Last'), $this->generateLink(array(
+							'pg' => $this->_pagination->pages
+						)))->generate()
+					);
+				}
+				
+				$ul->appendChild($li);
+				$this->Form->appendChild($ul);
+			}
 		}
 	}
 	

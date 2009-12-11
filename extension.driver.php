@@ -24,6 +24,16 @@
 			);
 		}
 		
+		public function getSubscribedDelegates() {
+			return array(
+				array(
+					'page' => '/backend/',
+					'delegate' => 'InitaliseAdminPageHead',
+					'callback' => 'initaliseAdminPageHead'
+				)
+			);
+		}
+		
 		public function fetchNavigation() {
 			return array(
 				array(
@@ -32,6 +42,48 @@
 					'link'	=> '/formatters/'
 				)
 			);
+		}
+		
+	/*-------------------------------------------------------------------------
+		Delegates:
+	-------------------------------------------------------------------------*/
+		
+		public function initaliseAdminPageHead($context) {
+			$page = Administration::instance()->Page;
+			$includes = $editors = array();
+			$position = 29751000;
+			
+			foreach ($this->getFormatters(true) as $formatter) {
+				$class = $formatter['about']['handle'];
+				$editor = $formatter['options']['editor_name'];
+				
+				$editors[$class] = $editor;
+				
+				if (is_null($editor) or $editor == 'none') continue;
+				
+				$includes[] = $editor;
+			}
+			
+			$includes = array_unique($includes);
+			
+			$script = new XMLElement('script');
+			$script->setAttribute('type', 'text/javascript');
+			$script->setValue(sprintf(
+				'var HTMLFormatterEditors = %s;',
+				json_encode($editors)
+			));
+			
+			foreach ($includes as $index => $include) {
+				switch ($include) {
+					case 'ckeditor': $include = 'ckeditor/ckeditor.js'; break;
+					case 'snicked': $include = 'snicked/snicked.js'; break;
+				}
+				
+				$page->addScriptToHead(URL . "/extensions/ckeditor/lib/{$include}", $position++);
+			}
+			
+			$page->addElementToHead($script, $position++);
+			$page->addScriptToHead(URL . '/extensions/ckeditor/assets/editors.js', $position++);
 		}
 		
 	/*-------------------------------------------------------------------------
@@ -58,8 +110,21 @@
 			foreach ($tfm->listAll() as $handle => $about) {
 				if (!isset($about['html-formatter-editable'])) continue;
 				
-				$about['handle'] = $handle;
-				$results[] = $about;
+				if (!$full) {
+					$about['handle'] = $handle;
+					$results[] = $about;
+				}
+				
+				else {
+					$formatter = $tfm->create($handle);
+					$about = $formatter->about();
+					$about['handle'] = $handle;
+					
+					$results[] = array(
+						'about'		=> $about,
+						'options'	=> $formatter->options()
+					);
+				}
 			}
 			
 			// Sorting:
@@ -193,7 +258,8 @@
 				var_export($new['options']['pretty_quotation_marks'], true),
 				var_export($new['options']['pretty_sentence_spacing'], true),
 				var_export($new['options']['pretty_symbols'], true),
-				var_export($new['options']['prevent_widowed_words'], true)
+				var_export($new['options']['prevent_widowed_words'], true),
+				var_export($new['options']['editor_name'], true)
 			);
 			
 			// Write file to disk:

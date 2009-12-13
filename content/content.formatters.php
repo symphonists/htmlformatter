@@ -268,21 +268,21 @@
 				__('Editors'), 'radio', $fieldset,
 				array(
 					array(
-						'label'		=> '%s Disable all&nbsp;editors?',
-						'help'		=> 'Don\'t use any of the available editor&nbsp;components.',
+						'label'		=> '%s Disable&nbsp;editors?',
+						'help'		=> 'No fancy editors for us,&nbsp;thanks.',
 						'name'		=> 'editor_name',
 						'value'		=> 'none',
 						'default'	=> true
 					),
 					array(
-						'label'		=> '%s Use the CKEditor&nbsp;editor?',
-						'help'		=> '<a href="http://ckeditor.com/">CKEditor</a> is a comprehensive WYSIWYG editor&nbsp;component.',
+						'label'		=> '%s Use&nbsp;CKEditor?',
+						'help'		=> '<a href="http://ckeditor.com/">CKEditor</a> is a comprehensive WYSIWYG&nbsp;editor.',
 						'name'		=> 'editor_name',
 						'value'		=> 'ckeditor'
 					),
 					array(
-						'label'		=> '%s Use the JWYSIWYG&nbsp;editor?',
-						'help'		=> '<a href="http://code.google.com/p/jwysiwyg/">JWYSIWYG</a> is a light-weight WYSIWYG editor&nbsp;component.',
+						'label'		=> '%s Use&nbsp;JWYSIWYG?',
+						'help'		=> '<a href="http://code.google.com/p/jwysiwyg/">JWYSIWYG</a> is a light-weight&nbsp;editor.',
 						'name'		=> 'editor_name',
 						'value'		=> 'jwysiwyg'
 					)

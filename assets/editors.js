@@ -26,5 +26,9 @@ jQuery(document).ready(function () {
 		        );
 		    });
 		}
+		
+		else if (editor == 'jwysiwyg') {
+			jQuery('textarea.' + formatter).wysiwyg();
+		}
 	});
 });

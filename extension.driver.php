@@ -75,11 +75,14 @@
 			
 			foreach ($includes as $index => $include) {
 				switch ($include) {
-					case 'ckeditor': $include = 'ckeditor/ckeditor.js'; break;
-					case 'snicked': $include = 'snicked/snicked.js'; break;
+					case 'ckeditor':
+						$page->addScriptToHead(URL . '/extensions/htmlformatter/editors/ckeditor/ckeditor.js', $position++);
+						break;
+					case 'jwysiwyg':
+						$page->addScriptToHead(URL . '/extensions/htmlformatter/editors/jwysiwyg/jquery.wysiwyg.js', $position++);
+						$page->addStylesheetToHead(URL . '/extensions/htmlformatter/editors/jwysiwyg/jquery.wysiwyg.css', 'screen', $position++);
+						break;
 				}
-				
-				$page->addScriptToHead(URL . "/extensions/htmlformatter/editors/{$include}", $position++);
 			}
 			
 			$page->addElementToHead($script, $position++);

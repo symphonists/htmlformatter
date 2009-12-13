@@ -447,6 +447,11 @@
 					'help'	=> '<a href="http://ckeditor.com/">CKEditor</a> is a comprehensive WYSIWYG editor&nbsp;component.',
 					'name'	=> 'ckeditor'
 				),
+				array(
+					'label'	=> '%s Use the JWYSIWYG&nbsp;editor?',
+					'help'	=> '<a href="http://code.google.com/p/jwysiwyg/">JWYSIWYG</a> is a light-weight WYSIWYG editor&nbsp;component.',
+					'name'	=> 'jwysiwyg'
+				),
 				
 				/*
 				array(

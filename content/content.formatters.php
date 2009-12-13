@@ -208,318 +208,87 @@
 			
 		// Options ------------------------------------------------------------
 			
-			$label = new XMLElement('h3', __('Options'));
-			$label->setAttribute('class', 'html-formatter-label');
-			$fieldset->appendChild($label);
-			
-			$options = new XMLElement('div');
-			$options->setAttribute('class', 'html-formatter-options');
-			
-			$row = new XMLElement('div');
-			
-			// Pretty acronyms:
-			$option = new XMLElement('div');
-			$option->setAttribute('class', 'html-formatter-option');
-			
-			$input = Widget::Input('fields[options][pretty_acronyms]', 'yes');
-			$input->setAttribute('type', 'checkbox');
-			
-			if ($this->_fields['options']['pretty_acronyms']) {
-				$input->setAttribute('checked', 'checked');
-			}
-			
-			$label = Widget::Label(__(
-				'%s Prettify&nbsp;acronyms?', array(
-					$input->generate()
+			$this->buildOptions(
+				__('Options'), 'checkbox', $fieldset,
+				array(
+					array(
+						'label'		=> '%s Prettify&nbsp;acronyms?',
+						'help'		=> 'Convert <code>ABBR(Abbreviation or acronym description)</code> into its HTML&nbsp;counterpart.',
+						'name'		=> 'pretty_acronyms',
+						'value'		=> 'yes'
+					),
+					array(
+						'label'		=> '%s Prettify&nbsp;ampersands?',
+						'help'		=> 'For example &amp; would become <code>&lt;span class="ampersand"&gt;&amp;&lt;/span&gt;</code>.',
+						'name'		=> 'pretty_ampersands',
+						'value'		=> 'yes'
+					),
+					array(
+						'label'		=> '%s Prettify quotation&nbsp;marks?',
+						'help'		=> 'Convert any single and double quotation marks into their fancy&nbsp;counterparts.',
+						'name'		=> 'pretty_quotation_marks',
+						'value'		=> 'yes'
+					),
+					array(
+						'label'		=> '%s Prettify&nbsp;dashes?',
+						'help'		=> 'Convert any single dashes into en-dashes and double dashes into&nbsp;em-dashes.',
+						'name'		=> 'pretty_dashes',
+						'value'		=> 'yes'
+					),
+					array(
+						'label'		=> '%s Prettify&nbsp;ellipses?',
+						'help'		=> 'For example <code>foo...</code> would become &lt;span class="ellipsis"&gt;foo&hellip;&lt;/span&gt;.',
+						'name'		=> 'pretty_ellipses',
+						'value'		=> 'yes'
+					),
+					array(
+						'label'		=> '%s Prettify sentence&nbsp;spacing?',
+						'help'		=> 'Convert single spaces between sentences to double&nbsp;spaces.',
+						'name'		=> 'pretty_sentence_spacing',
+						'value'		=> 'yes'
+					),
+					array(
+						'label'		=> '%s Prettify&nbsp;symbols?',
+						'help'		=> 'Convert <code>(C)</code>, <code>(R)</code> or <code>TM</code> into their respective&nbsp;symbols.',
+						'name'		=> 'pretty_symbols',
+						'value'		=> 'yes'
+					),
+					array(
+						'label'		=> '%s Prevent widowed&nbsp;words?',
+						'help'		=> 'Prevent words at the end of a paragraph or header from being wrapped onto the following&nbsp;line.',
+						'name'		=> 'prevent_widowed_words',
+						'value'		=> 'yes'
+					)
 				)
-			));
-			$option->appendChild($label);
-			
-			$help = new XMLElement('p', __('
-				Convert <code>ABBR(Abbreviation or acronym description)</code> into its HTML&nbsp;counterpart.
-			'));
-			$help->setAttribute('class', 'help');
-			
-			$option->appendChild($help);
-			$row->appendChild($option);
-			
-			// Pretty ampersands:
-			$option = new XMLElement('div');
-			$option->setAttribute('class', 'html-formatter-option');
-			
-			$input = Widget::Input('fields[options][pretty_ampersands]', 'yes');
-			$input->setAttribute('type', 'checkbox');
-			
-			if ($this->_fields['options']['pretty_ampersands']) {
-				$input->setAttribute('checked', 'checked');
-			}
-			
-			$label = Widget::Label(__(
-				'%s Prettify&nbsp;ampersands?', array(
-					$input->generate()
-				)
-			));
-			$option->appendChild($label);
-			
-			$help = new XMLElement('p', __('
-				For example <code>&amp;amp;</code> would become <code>&lt;span class="ampersand"&gt;&amp;amp;&lt;/span&gt;</code>.
-			'));
-			$help->setAttribute('class', 'help');
-			
-			$option->appendChild($help);
-			$row->appendChild($option);
-			
-			// Pretty quotation marks:
-			$option = new XMLElement('div');
-			$option->setAttribute('class', 'html-formatter-option');
-			
-			$input = Widget::Input('fields[options][pretty_quotation_marks]', 'yes');
-			$input->setAttribute('type', 'checkbox');
-			
-			if ($this->_fields['options']['pretty_quotation_marks']) {
-				$input->setAttribute('checked', 'checked');
-			}
-			
-			$label = Widget::Label(__(
-				'%s Prettify quotation&nbsp;marks?', array(
-					$input->generate()
-				)
-			));
-			$option->appendChild($label);
-			
-			$help = new XMLElement('p', __('
-				Convert any single and double quotation marks into their fancy&nbsp;counterparts.
-			'));
-			$help->setAttribute('class', 'help');
-			
-			$option->appendChild($help);
-			$row->appendChild($option);
-			
-			$options->appendChild($row);
-			$row = new XMLElement('div');
-			
-			// Pretty dashes:
-			$option = new XMLElement('div');
-			$option->setAttribute('class', 'html-formatter-option');
-			
-			$input = Widget::Input('fields[options][pretty_dashes]', 'yes');
-			$input->setAttribute('type', 'checkbox');
-			
-			if ($this->_fields['options']['pretty_dashes']) {
-				$input->setAttribute('checked', 'checked');
-			}
-			
-			$label = Widget::Label(__(
-				'%s Prettify dashes?', array(
-					$input->generate()
-				)
-			));
-			$option->appendChild($label);
-			
-			$help = new XMLElement('p', __('
-				Convert any single dashes into en-dashes and double dashes into&nbsp;em-dashes.
-			'));
-			$help->setAttribute('class', 'help');
-			
-			$option->appendChild($help);
-			$row->appendChild($option);
-			
-			// Pretty ellipses:
-			$option = new XMLElement('div');
-			$option->setAttribute('class', 'html-formatter-option');
-			
-			$input = Widget::Input('fields[options][pretty_ellipses]', 'yes');
-			$input->setAttribute('type', 'checkbox');
-			
-			if ($this->_fields['options']['pretty_ellipses']) {
-				$input->setAttribute('checked', 'checked');
-			}
-			
-			$label = Widget::Label(__(
-				'%s Prettify&nbsp;ellipses?', array(
-					$input->generate()
-				)
-			));
-			$option->appendChild($label);
-			
-			$help = new XMLElement('p', __('
-				For example <code>foo...</code> would become <code>&lt;span class="ellipsis"&gt;foo&amp;hellip;&lt;/span&gt;</code>.
-			'));
-			$help->setAttribute('class', 'help');
-			
-			$option->appendChild($help);
-			$row->appendChild($option);
-			
-			// Pretty sentence spacing:
-			$option = new XMLElement('div');
-			$option->setAttribute('class', 'html-formatter-option');
-			
-			$input = Widget::Input('fields[options][pretty_sentence_spacing]', 'yes');
-			$input->setAttribute('type', 'checkbox');
-			
-			if ($this->_fields['options']['pretty_sentence_spacing']) {
-				$input->setAttribute('checked', 'checked');
-			}
-			
-			$label = Widget::Label(__(
-				'%s Prettify sentence&nbsp;spacing?', array(
-					$input->generate()
-				)
-			));
-			$option->appendChild($label);
-			
-			$help = new XMLElement('p', __('
-				Convert single spaces between sentences to double spaces.
-			'));
-			$help->setAttribute('class', 'help');
-			
-			$option->appendChild($help);
-			$row->appendChild($option);
-			
-			$options->appendChild($row);
-			$row = new XMLElement('div');
-			
-			// Pretty symbols:
-			$option = new XMLElement('div');
-			$option->setAttribute('class', 'html-formatter-option');
-			
-			$input = Widget::Input('fields[options][pretty_symbols]', 'yes');
-			$input->setAttribute('type', 'checkbox');
-			
-			if ($this->_fields['options']['pretty_symbols']) {
-				$input->setAttribute('checked', 'checked');
-			}
-			
-			$label = Widget::Label(__(
-				'%s Prettify symbols?', array(
-					$input->generate()
-				)
-			));
-			$option->appendChild($label);
-			
-			$help = new XMLElement('p', __('
-				Convert <code>(C)</code>, <code>(R)</code> or <code>TM</code> into their respective&nbsp;symbols.
-			'));
-			$help->setAttribute('class', 'help');
-			
-			$option->appendChild($help);
-			$row->appendChild($option);
-			
-			// Prevent widowed words:
-			$option = new XMLElement('div');
-			$option->setAttribute('class', 'html-formatter-option');
-			
-			$input = Widget::Input('fields[options][prevent_widowed_words]', 'yes');
-			$input->setAttribute('type', 'checkbox');
-			
-			if ($this->_fields['options']['prevent_widowed_words']) {
-				$input->setAttribute('checked', 'checked');
-			}
-			
-			$label = Widget::Label(__(
-				'%s Prevent widowed&nbsp;words?', array(
-					$input->generate()
-				)
-			));
-			$option->appendChild($label);
-			
-			$help = new XMLElement('p', __('
-				Prevent words at the end of a paragraph or header from being wrapped onto the following&nbsp;line.
-			'));
-			$help->setAttribute('class', 'help');
-			
-			$option->appendChild($help);
-			$row->appendChild($option);
-			
-			$options->appendChild($row);
-			$fieldset->appendChild($options);
+			);
 			
 		// Editor -------------------------------------------------------------
 			
-			$editors = array(
+			$this->buildOptions(
+				__('Editors'), 'radio', $fieldset,
 				array(
-					'label'	=> '%s Disable all&nbsp;editors?',
-					'help'	=> 'Don\'t use any of the available editor&nbsp;components.',
-					'name'	=> 'none'
-				),
-				array(
-					'label'	=> '%s Use the CKEditor&nbsp;editor?',
-					'help'	=> '<a href="http://ckeditor.com/">CKEditor</a> is a comprehensive WYSIWYG editor&nbsp;component.',
-					'name'	=> 'ckeditor'
-				),
-				array(
-					'label'	=> '%s Use the JWYSIWYG&nbsp;editor?',
-					'help'	=> '<a href="http://code.google.com/p/jwysiwyg/">JWYSIWYG</a> is a light-weight WYSIWYG editor&nbsp;component.',
-					'name'	=> 'jwysiwyg'
-				),
-				
-				/*
-				array(
-					'label'	=> '%s Use the Snicked editor?',
-					'help'	=> '<a href="http://github.com/rowan-lewis/snicked">Snicked</a> is an advanced raw HTML editor&nbsp;component.',
-					'name'	=> 'snicked'
+					array(
+						'label'		=> '%s Disable all&nbsp;editors?',
+						'help'		=> 'Don\'t use any of the available editor&nbsp;components.',
+						'name'		=> 'editor_name',
+						'value'		=> 'none',
+						'default'	=> true
+					),
+					array(
+						'label'		=> '%s Use the CKEditor&nbsp;editor?',
+						'help'		=> '<a href="http://ckeditor.com/">CKEditor</a> is a comprehensive WYSIWYG editor&nbsp;component.',
+						'name'		=> 'editor_name',
+						'value'		=> 'ckeditor'
+					),
+					array(
+						'label'		=> '%s Use the JWYSIWYG&nbsp;editor?',
+						'help'		=> '<a href="http://code.google.com/p/jwysiwyg/">JWYSIWYG</a> is a light-weight WYSIWYG editor&nbsp;component.',
+						'name'		=> 'editor_name',
+						'value'		=> 'jwysiwyg'
+					)
 				)
-				*/
 			);
 			
-			$label = new XMLElement('h3', __('Editors'));
-			$label->setAttribute('class', 'html-formatter-label');
-			$fieldset->appendChild($label);
-			
-			$options = new XMLElement('div');
-			$options->setAttribute('class', 'html-formatter-options');
-			
-			$row = null;
-			
-			foreach ($editors as $index => $editor) {
-				if ($index % 3 == 0) {
-					if ($row) $options->appendChild($row);
-					
-					$row = new XMLElement('div');
-				}
-				
-				// Prevent widowed words:
-				$option = new XMLElement('div');
-				$option->setAttribute('class', 'html-formatter-option');
-				
-				$input = Widget::Input('fields[options][editor_name]', $editor['name']);
-				$input->setAttribute('type', 'radio');
-				
-				if ($this->_fields['options']['editor_name'] == $editor['name']) {
-					$input->setAttribute('checked', 'checked');
-				}
-				
-				else if (@!$this->_fields['options']['editor_name'] and $index == 0) {
-					$input->setAttribute('checked', 'checked');
-				}
-				
-				$label = Widget::Label(__(
-					$editor['label'], array(
-						$input->generate()
-					)
-				));
-				$option->appendChild($label);
-				
-				$help = new XMLElement('p', __($editor['help']));
-				$help->setAttribute('class', 'help');
-				
-				$option->appendChild($help);
-				$row->appendChild($option);
-			}
-			
-			header('content-type: text/plain');
-			
-			$index = $index % 3;
-			
-			while ($index < 2) {
-				$option = new XMLElement('div');
-				$row->appendChild($option);
-				
-				$index++;
-			}
-			
-			$options->appendChild($row);
-			$fieldset->appendChild($options);
 			$this->Form->appendChild($fieldset);
 			
 		// Footer -------------------------------------------------------------
@@ -546,6 +315,56 @@
 			}
 			
 			$this->Form->appendChild($div);
+		}
+		
+		public function buildOptions($title, $type, $fieldset, $data) {
+			$label = new XMLElement('h3', $title);
+			$label->setAttribute('class', 'html-formatter-label');
+			$fieldset->appendChild($label);
+			
+			$options = new XMLElement('div');
+			$options->setAttribute('class', 'html-formatter-options');
+			
+			$row = null;
+			
+			foreach ($data as $index => $item) {
+				if ($index % 3 == 0) {
+					if ($row) $options->appendChild($row);
+					
+					$row = new XMLElement('div');
+				}
+				
+				// Prevent widowed words:
+				$option = new XMLElement('div');
+				$option->setAttribute('class', 'html-formatter-option');
+				
+				$input = Widget::Input('fields[options][' . $item['name'] . ']', $item['value']);
+				$input->setAttribute('type', $type);
+				
+				if ($this->_fields['options'][$item['name']] == $item['value']) {
+					$input->setAttribute('checked', 'checked');
+				}
+				
+				else if (@!$this->_fields['options'][$item['name']] and @$item['default']) {
+					$input->setAttribute('checked', 'checked');
+				}
+				
+				$label = Widget::Label(__(
+					$item['label'], array(
+						$input->generate()
+					)
+				));
+				$option->appendChild($label);
+				
+				$help = new XMLElement('p', __($item['help']));
+				$help->setAttribute('class', 'help');
+				
+				$option->appendChild($help);
+				$row->appendChild($option);
+			}
+			
+			$options->appendChild($row);
+			$fieldset->appendChild($options);
 		}
 		
 	/*-------------------------------------------------------------------------

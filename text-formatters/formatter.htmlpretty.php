@@ -13,7 +13,7 @@
 				'html-formatter-editable'	=> true,
 				'html-formatter-file'		=> __FILE__,
 				'html-formatter-created'	=> '2009-12-01T14:00:00+00:00',
-				'html-formatter-updated'	=> '2009-12-11T03:22:52+00:00'
+				'html-formatter-updated'	=> '2009-12-13T01:23:14+00:00'
 			);
 		}
 		
@@ -24,7 +24,7 @@
 				'pretty_dashes'				=> true,
 				'pretty_ellipses'			=> true,
 				'pretty_quotation_marks'	=> true,
-				'pretty_sentence_spacing'	=> false,
+				'pretty_sentence_spacing'	=> true,
 				'pretty_symbols'			=> true,
 				'prevent_widowed_words'		=> true,
 				'editor_name'				=> 'none'

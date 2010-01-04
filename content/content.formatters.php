@@ -285,6 +285,12 @@
 						'help'		=> '<a href="http://code.google.com/p/jwysiwyg/">JWYSIWYG</a> is a light-weight&nbsp;editor.',
 						'name'		=> 'editor_name',
 						'value'		=> 'jwysiwyg'
+					),
+					array(
+						'label'		=> '%s Use&nbsp;Snicked?',
+						'help'		=> '<a href="http://github.com/rowan-lewis/snicked">Snicked</a> is a simple code editor with support for auto-completion snippets for&nbsp;HTML.',
+						'name'		=> 'editor_name',
+						'value'		=> 'snicked'
 					)
 				)
 			);

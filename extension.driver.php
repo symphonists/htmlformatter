@@ -82,6 +82,10 @@
 						$page->addScriptToHead(URL . '/extensions/htmlformatter/editors/jwysiwyg/jquery.wysiwyg.js', $position++);
 						$page->addStylesheetToHead(URL . '/extensions/htmlformatter/editors/jwysiwyg/jquery.wysiwyg.css', 'screen', $position++);
 						break;
+					case 'snicked':
+						$page->addScriptToHead(URL . '/extensions/htmlformatter/editors/snicked/assets/jquery.snickedCore.js', $position++);
+						$page->addScriptToHead(URL . '/extensions/htmlformatter/editors/snicked/assets/jquery.snicked.js', $position++);
+						break;
 				}
 			}
 			

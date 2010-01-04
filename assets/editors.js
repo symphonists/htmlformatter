@@ -1,4 +1,6 @@
 jQuery(document).ready(function () {
+	var root = Symphony.WEBSITE + '/extensions/htmlformatter';
+	
 	jQuery.each(HTMLFormatterEditors, function(formatter, editor) {
 		if (editor == 'ckeditor') {
 			jQuery('textarea.' + formatter).each(function(index) {
@@ -29,6 +31,10 @@ jQuery(document).ready(function () {
 		
 		else if (editor == 'jwysiwyg') {
 			jQuery('textarea.' + formatter).wysiwyg();
+		}
+		
+		else if (editor == 'snicked') {
+			jQuery('textarea.' + formatter).snicked(root + '/editors/snicked/demos/html.js');
 		}
 	});
 });

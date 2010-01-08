@@ -1,0 +1,45 @@
+* {
+	border: none;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	font: 12px 'monaco', 'bitstream vera sans mono', 'consolas';
+	margin: 0;
+	outline: none;
+	padding: 0;
+}
+
+.snicked-suggestions {
+	background: hsla(210, 10%, 10%, 0.75);
+	bottom: 0;
+	color: hsl(210, 10%, 90%);
+	cursor: default;
+	display: block;
+	left: 0;
+	list-style: none;
+	padding: 0 5px;
+	position: absolute;
+	right: 0;
+	z-index: 101;
+}
+.snicked-suggestions > li {
+	color: hsl(210, 10%, 50%);
+	display: block;
+	float: left;
+	min-width: 6em;
+	padding: 5px;
+}
+.snicked-suggestions > li.current {
+	color: hsl(210, 10%, 90%);
+}
+
+textarea {
+	background: hsl(210, 10%, 20%);
+	color: hsl(210, 10%, 90%);
+	height: 100%;
+	left: 0;
+	padding: 10px;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	z-index: 100;
+}

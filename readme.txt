@@ -7,9 +7,9 @@ of malformed markup breaking the front-end.
 It also includes an editor that lets you create custom formatters with only the
 options you need enabled.
 
-Version: 2.1.0
+Version: 2.1.1
 Author: Rowan Lewis <me@rowanlewis.com>
-Build Date: 2 December 2009
+Build Date: 7 January 2010
 Requirements: Symphony 2.0.2
 
 

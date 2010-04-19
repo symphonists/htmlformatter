@@ -622,7 +622,7 @@
 			$xpath = new DOMXPath($document);
 			$nodes = array(); $breaks = array(
 				'section', 'article', 'aside', 'header', 'footer', 'nav',
-				'dialog', 'figure', 'address', 'p', 'hr', 'br', 'pre',
+				'dialog', 'figure', 'address', 'p', 'hr', 'pre',
 				'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'img',
 				'iframe', 'embed', 'object', 'param', 'video', 'audio',
 				'source', 'canvas', 'map', 'area', 'table', 'caption',

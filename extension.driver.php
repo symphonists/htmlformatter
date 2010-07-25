@@ -644,7 +644,7 @@
 			);
 			
 			// Find nodes that may contain paragraphs:
-			foreach ($xpath->query('//body | //blockquote | //div | //header | //footer | //aside || //article | //section') as $node) {
+			foreach ($xpath->query('//body | //blockquote | //div | //header | //footer | //aside | //article | //section') as $node) {
 				array_unshift($nodes, $node);
 			}
 			

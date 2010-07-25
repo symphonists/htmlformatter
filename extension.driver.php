@@ -586,7 +586,12 @@
 					
 					// Stuff to get rid of awful word this:
 					'bare'							=> true,
-					'word-2000'						=> true
+					'word-2000'						=> true,
+					
+					// HTML5 Elements:
+					'new-blocklevel-tags'			=> 'section nav article aside hgroup header footer figure figcaption ruby video audio canvas details datagrid summary menu',
+					'new-inline-tags'				=> 'time mark rt rp output progress meter',
+					'new-empty-tags'				=> 'wbr source keygen command'
 				), 'utf8'
 			);
 			
@@ -609,7 +614,12 @@
 					
 					// Stuff to get rid of awful word this:
 					'bare'							=> true,
-					'word-2000'						=> true
+					'word-2000'						=> true,
+					
+					// HTML5 Elements:
+					'new-blocklevel-tags'			=> 'section nav article aside hgroup header footer figure figcaption ruby video audio canvas details datagrid summary menu',
+					'new-inline-tags'				=> 'time mark rt rp output progress meter',
+					'new-empty-tags'				=> 'wbr source keygen command'
 				), 'utf8'
 			);
 			
@@ -634,7 +644,7 @@
 			);
 			
 			// Find nodes that may contain paragraphs:
-			foreach ($xpath->query('//body | //blockquote | //div') as $node) {
+			foreach ($xpath->query('//body | //blockquote | //div | //header | //footer | //aside || //article | //section') as $node) {
 				array_unshift($nodes, $node);
 			}
 			

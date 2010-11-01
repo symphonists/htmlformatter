@@ -1,4 +1,4 @@
-# Profile Devkit
+# HTML Formatter
 
 The "HTML Formatter" allows you to use HTML safely on your website without risk
 of malformed markup breaking the front-end.

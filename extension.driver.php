@@ -13,8 +13,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'HTML Formatter',
-				'version'		=> '2.1.1',
-				'release-date'	=> '2010-01-07',
+				'version'		=> '2.1.2',
+				'release-date'	=> '2010-11-01',
 				'author'		=> array(
 					'name'			=> 'Rowan Lewis',
 					'website'		=> 'http://pixelcarnage.com/',
